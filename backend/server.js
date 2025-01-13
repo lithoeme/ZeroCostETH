@@ -3,17 +3,11 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// Add CORS headers to allow cross-origin requests
-res.setHeader('Access-Control-Allow-Origin', '*');  // Allow all origins
-res.setHeader('Access-Control-Allow-Methods', 'GET');
-res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-
 // Function to serve static files (HTML, JS)
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, '..', 'frontend', req.url);
 
-    if (req.url === '/' || req.url === '') {
+    if (req.url === '/') {
         filePath = path.join(__dirname, '..', 'frontend', 'index.html');
     }
 
@@ -24,13 +18,7 @@ const serveStaticFiles = (req, res) => {
         contentType = 'application/javascript';
     } else if (extname === '.css') {
         contentType = 'text/css';
-    } else if (extname === '.jpg' || extname === '.jpeg') {
-        contentType = 'image/jpeg';
-    } else if (extname === '.png') {
-        contentType = 'image/png';
     }
-
-    console.log(`Serving file: ${filePath}`);
 
     fs.readFile(filePath, (err, content) => {
         if (err) {
@@ -44,14 +32,13 @@ const serveStaticFiles = (req, res) => {
 };
 
 // Handle the Ethereum price request
-// Handle the Ethereum price request
 const getEthereumPrice = (req, res) => {
-    // Allow CORS (Cross-Origin Resource Sharing)
-    res.setHeader('Access-Control-Allow-Origin', '*');  // Allow all origins
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
     if (req.url === '/api/price' && req.method === 'GET') {
+        // CORS header to allow all origins
+        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
         https.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', (apiRes) => {
             let data = '';
 
@@ -82,16 +69,15 @@ const getEthereumPrice = (req, res) => {
     }
 };
 
-
 // Create HTTP server
 const server = http.createServer((req, res) => {
-    // Handle the Ethereum price request
-    if (req.url === '/api/price' && req.method === 'GET') {
-        getEthereumPrice(req, res);
-    }
     // Serve static files
-    else {
+    if (req.url.startsWith('/frontend')) {
         serveStaticFiles(req, res);
+    }
+    // Serve Ethereum price data
+    else {
+        getEthereumPrice(req, res);
     }
 });
 
