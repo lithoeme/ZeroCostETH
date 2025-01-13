@@ -12,10 +12,9 @@ const enableCORS = (req, res) => {
 
 // Function to serve static files (HTML, JS, CSS)
 const serveStaticFiles = (req, res) => {
-    // Adjusted file path to serve files from the 'frontend' folder
     let filePath = path.join(__dirname, 'frontend', req.url === '/' ? 'index.html' : req.url);
 
-    console.log(`Serving file: ${filePath}`); // Log the file path to troubleshoot
+    console.log(`Serving file: ${filePath}`);
 
     fs.readFile(filePath, (err, content) => {
         if (err) {
@@ -72,10 +71,21 @@ const getEthereumPrice = (req, res) => {
     }
 };
 
+// Handle favicon request
+const handleFaviconRequest = (req, res) => {
+    if (req.url === '/favicon.ico') {
+        res.writeHead(200, { 'Content-Type': 'image/x-icon' });
+        res.end();
+    }
+};
+
 // Create HTTP server
 const server = http.createServer((req, res) => {
     // Apply CORS headers to all requests
     enableCORS(req, res);
+
+    // Handle favicon request separately
+    handleFaviconRequest(req, res);
 
     // Serve static files (HTML, JS, CSS)
     if (req.url === '/' || req.url.startsWith('/frontend')) {
