@@ -44,7 +44,13 @@ const serveStaticFiles = (req, res) => {
 };
 
 // Handle the Ethereum price request
+// Handle the Ethereum price request
 const getEthereumPrice = (req, res) => {
+    // Allow CORS (Cross-Origin Resource Sharing)
+    res.setHeader('Access-Control-Allow-Origin', '*');  // Allow all origins
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
     if (req.url === '/api/price' && req.method === 'GET') {
         https.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', (apiRes) => {
             let data = '';
@@ -75,6 +81,7 @@ const getEthereumPrice = (req, res) => {
         });
     }
 };
+
 
 // Create HTTP server
 const server = http.createServer((req, res) => {
