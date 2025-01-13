@@ -3,28 +3,30 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// Serve static files from the frontend directory
+// Function to enable CORS for all requests
+const enableCORS = (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // You can replace '*' with a specific domain if required.
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+};
+
+// Function to serve static files (HTML, JS, CSS)
 const serveStaticFiles = (req, res) => {
-    let filePath = path.join(__dirname, '..', 'frontend', req.url);
-
-    if (req.url === '/') {
-        filePath = path.join(__dirname, '..', 'frontend', 'index.html');
-    }
-
-    const extname = path.extname(filePath);
-    let contentType = 'text/html';
-
-    if (extname === '.js') {
-        contentType = 'application/javascript';
-    } else if (extname === '.css') {
-        contentType = 'text/css';
-    }
+    let filePath = path.join(__dirname, 'frontend', req.url === '/' ? 'index.html' : req.url);
 
     fs.readFile(filePath, (err, content) => {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('File Not Found');
         } else {
+            const extname = path.extname(filePath);
+            let contentType = 'text/html';
+            if (extname === '.js') {
+                contentType = 'application/javascript';
+            } else if (extname === '.css') {
+                contentType = 'text/css';
+            }
+            enableCORS(req, res);  // Ensure CORS headers are applied before sending content
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content);
         }
@@ -47,6 +49,8 @@ const getEthereumPrice = (req, res) => {
                     const price = parsedData.ethereum.usd;
                     const timestamp = new Date().toISOString();
 
+                    enableCORS(req, res);  // Ensure CORS headers are applied before sending JSON data
+
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
                         price: price,
@@ -66,18 +70,20 @@ const getEthereumPrice = (req, res) => {
 
 // Create HTTP server
 const server = http.createServer((req, res) => {
-    // Serve static files
-    if (req.url.startsWith('/frontend')) {
+    // Apply CORS headers to all requests
+    enableCORS(req, res);
+
+    // Serve static files (HTML, JS, CSS)
+    if (req.url === '/' || req.url.startsWith('/frontend')) {
         serveStaticFiles(req, res);
-    }
-    // Serve Ethereum price data
-    else {
+    } else {
+        // Handle Ethereum price request
         getEthereumPrice(req, res);
     }
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+// Get port from environment variables or default to 8080
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
