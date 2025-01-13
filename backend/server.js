@@ -3,6 +3,12 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
+// Add CORS headers to allow cross-origin requests
+res.setHeader('Access-Control-Allow-Origin', '*');  // Allow all origins
+res.setHeader('Access-Control-Allow-Methods', 'GET');
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+
 // Function to serve static files (HTML, JS)
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, '..', 'frontend', req.url);
