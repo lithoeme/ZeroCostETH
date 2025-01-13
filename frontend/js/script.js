@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function to fetch the current Ethereum price
 function updatePrice() {
-    fetch('https://your-app-name.onrender.com/api/price')
+    fetch('https://zerocosteth.onrender.com/api/price')
         .then(response => response.json())
         .then(data => {
             const price = data.price;

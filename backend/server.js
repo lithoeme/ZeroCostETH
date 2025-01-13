@@ -3,34 +3,33 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// Serve static files from the frontend directory
+// Function to serve static files (HTML, JS)
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, '..', 'frontend', req.url);
 
-    // If the request is for the root, serve index.html
-    if (req.url === '/' || req.url === '/frontend/' || req.url === '/frontend') {
+    if (req.url === '/' || req.url === '') {
         filePath = path.join(__dirname, '..', 'frontend', 'index.html');
     }
 
-    // Determine the file type based on the extension
     const extname = path.extname(filePath);
     let contentType = 'text/html';
+
     if (extname === '.js') {
         contentType = 'application/javascript';
     } else if (extname === '.css') {
         contentType = 'text/css';
+    } else if (extname === '.jpg' || extname === '.jpeg') {
+        contentType = 'image/jpeg';
+    } else if (extname === '.png') {
+        contentType = 'image/png';
     }
 
-    // Read the file and send the response
+    console.log(`Serving file: ${filePath}`);
+
     fs.readFile(filePath, (err, content) => {
         if (err) {
-            if (err.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/plain' });
-                res.end('File Not Found');
-            } else {
-                res.writeHead(500, { 'Content-Type': 'text/plain' });
-                res.end('Error loading static files: ' + err.message);
-            }
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('File Not Found');
         } else {
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content);
@@ -38,18 +37,12 @@ const serveStaticFiles = (req, res) => {
     });
 };
 
-// Create an HTTP server
-const server = http.createServer((req, res) => {
-    // Serve static files (CSS, JS, and HTML)
-    if (req.url.startsWith('/frontend')) {
-        serveStaticFiles(req, res);
-    }
-    // API endpoint to fetch Ethereum price and timestamp
-    else if (req.url === '/api/price' && req.method === 'GET') {
+// Handle the Ethereum price request
+const getEthereumPrice = (req, res) => {
+    if (req.url === '/api/price' && req.method === 'GET') {
         https.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', (apiRes) => {
             let data = '';
 
-            // Collect the response data
             apiRes.on('data', chunk => {
                 data += chunk;
             });
@@ -74,14 +67,23 @@ const server = http.createServer((req, res) => {
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Error fetching data' }));
         });
-    } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
+    }
+};
+
+// Create HTTP server
+const server = http.createServer((req, res) => {
+    // Handle the Ethereum price request
+    if (req.url === '/api/price' && req.method === 'GET') {
+        getEthereumPrice(req, res);
+    }
+    // Serve static files
+    else {
+        serveStaticFiles(req, res);
     }
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
