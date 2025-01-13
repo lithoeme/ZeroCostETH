@@ -14,25 +14,38 @@ const enableCORS = (req, res) => {
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, 'frontend', req.url === '/' ? 'index.html' : req.url);
 
-    console.log(`Serving file: ${filePath}`);
+    // Logging the requested file path to debug
+    console.log(`Requested file: ${filePath}`);
 
-    fs.readFile(filePath, (err, content) => {
-        if (err) {
+    // Check if the file exists, if not return 404
+    fs.exists(filePath, (exists) => {
+        if (!exists) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('File Not Found');
-        } else {
-            const extname = path.extname(filePath);
-            let contentType = 'text/html';
-            if (extname === '.js') {
-                contentType = 'application/javascript';
-            } else if (extname === '.css') {
-                contentType = 'text/css';
-            }
-
-            enableCORS(req, res);  // Apply CORS headers before serving content
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content);
+            return;
         }
+
+        // Serve the file if it exists
+        fs.readFile(filePath, (err, content) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('Server Error');
+            } else {
+                const extname = path.extname(filePath);
+                let contentType = 'text/html';
+                if (extname === '.js') {
+                    contentType = 'application/javascript';
+                } else if (extname === '.css') {
+                    contentType = 'text/css';
+                } else if (extname === '.ico') {
+                    contentType = 'image/x-icon';
+                }
+
+                enableCORS(req, res);  // Apply CORS headers before serving content
+                res.writeHead(200, { 'Content-Type': contentType });
+                res.end(content);
+            }
+        });
     });
 };
 
@@ -87,7 +100,10 @@ const server = http.createServer((req, res) => {
     // Handle favicon request separately
     handleFaviconRequest(req, res);
 
-    // Serve static files (HTML, JS, CSS)
+    // Log the incoming request for debugging
+    console.log(`Incoming request: ${req.url}`);
+
+    // Serve static files (HTML, JS, CSS) or handle API routes
     if (req.url === '/' || req.url.startsWith('/frontend')) {
         serveStaticFiles(req, res);
     } else {
