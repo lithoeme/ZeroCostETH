@@ -14,6 +14,8 @@ const enableCORS = (req, res) => {
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, 'frontend', req.url === '/' ? 'index.html' : req.url);
 
+    console.log(`Serving file: ${filePath}`); // Moved inside the function
+
     fs.readFile(filePath, (err, content) => {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -87,5 +89,3 @@ const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
-
-console.log(`Serving file: ${filePath}`);
