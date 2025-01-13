@@ -1,7 +1,7 @@
 {
   "name": "ethereum-price-site",
   "version": "1.0.0",
-  "description": "Fetch Ethereum price and timestamp with vanilla Node.js",
+  "description": "Ethereum Data",
   "main": "server.js",
   "scripts": {
     "start": "node backend/server.js"
