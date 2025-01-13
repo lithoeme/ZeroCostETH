@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// Function to serve static files (HTML, JS)
+// Serve static files from the frontend directory
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, '..', 'frontend', req.url);
 
@@ -34,11 +34,6 @@ const serveStaticFiles = (req, res) => {
 // Handle the Ethereum price request
 const getEthereumPrice = (req, res) => {
     if (req.url === '/api/price' && req.method === 'GET') {
-        // CORS header to allow all origins
-        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
         https.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', (apiRes) => {
             let data = '';
 
@@ -82,7 +77,7 @@ const server = http.createServer((req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
