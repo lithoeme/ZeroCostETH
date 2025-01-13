@@ -8,7 +8,7 @@ const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, '..', 'frontend', req.url);
 
     // If the request is for the root, serve index.html
-    if (req.url === '/') {
+    if (req.url === '/' || req.url === '/frontend/' || req.url === '/frontend') {
         filePath = path.join(__dirname, '..', 'frontend', 'index.html');
     }
 
@@ -24,9 +24,13 @@ const serveStaticFiles = (req, res) => {
     // Read the file and send the response
     fs.readFile(filePath, (err, content) => {
         if (err) {
-            // Send error response if the file is not found
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end('Error loading static files: ' + err.message);
+            if (err.code === 'ENOENT') {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('File Not Found');
+            } else {
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('Error loading static files: ' + err.message);
+            }
         } else {
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content);
