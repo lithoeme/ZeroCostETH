@@ -3,29 +3,42 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
+// Serve static files from the frontend directory
+const serveStaticFiles = (req, res) => {
+    let filePath = path.join(__dirname, '..', 'frontend', req.url);
+
+    // If the request is for the root, serve index.html
+    if (req.url === '/') {
+        filePath = path.join(__dirname, '..', 'frontend', 'index.html');
+    }
+
+    // Determine the file type based on the extension
+    const extname = path.extname(filePath);
+    let contentType = 'text/html';
+    if (extname === '.js') {
+        contentType = 'application/javascript';
+    } else if (extname === '.css') {
+        contentType = 'text/css';
+    }
+
+    // Read the file and send the response
+    fs.readFile(filePath, (err, content) => {
+        if (err) {
+            // Send error response if the file is not found
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Error loading static files: ' + err.message);
+        } else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content);
+        }
+    });
+};
+
 // Create an HTTP server
 const server = http.createServer((req, res) => {
-    // Serve frontend files if the URL matches the root or static assets (e.g., JS, CSS)
-    if (req.url === '/' || req.url.startsWith('/frontend/js') || req.url.startsWith('/frontend/css')) {
-        const filePath = path.join(__dirname, '..', 'frontend', req.url === '/' ? 'index.html' : req.url);
-
-        const extname = path.extname(filePath);
-        let contentType = 'text/html';
-        if (extname === '.js') {
-            contentType = 'application/javascript';
-        } else if (extname === '.css') {
-            contentType = 'text/css';
-        }
-
-        fs.readFile(filePath, (err, content) => {
-            if (err) {
-                res.writeHead(500);
-                res.end('Error loading file');
-            } else {
-                res.writeHead(200, { 'Content-Type': contentType });
-                res.end(content);
-            }
-        });
+    // Serve static files (CSS, JS, and HTML)
+    if (req.url.startsWith('/frontend')) {
+        serveStaticFiles(req, res);
     }
     // API endpoint to fetch Ethereum price and timestamp
     else if (req.url === '/api/price' && req.method === 'GET') {
@@ -39,14 +52,10 @@ const server = http.createServer((req, res) => {
 
             apiRes.on('end', () => {
                 try {
-                    // Parse the response from CoinGecko API
                     const parsedData = JSON.parse(data);
                     const price = parsedData.ethereum.usd;
-
-                    // Get current timestamp
                     const timestamp = new Date().toISOString();
 
-                    // Send the response back to the client
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
                         price: price,
@@ -62,7 +71,6 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ error: 'Error fetching data' }));
         });
     } else {
-        // Handle 404 for unmatched routes
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
     }
