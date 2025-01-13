@@ -5,11 +5,17 @@ const path = require('path');
 
 // Create an HTTP server
 const server = http.createServer((req, res) => {
-    // Serve frontend files if the URL matches the root or any static assets
-    if (req.url === '/' || req.url.startsWith('/assets')) {
+    // Serve frontend files if the URL matches the root or static assets (e.g., JS, CSS)
+    if (req.url === '/' || req.url.startsWith('/frontend/js') || req.url.startsWith('/frontend/css')) {
         const filePath = path.join(__dirname, '..', 'frontend', req.url === '/' ? 'index.html' : req.url);
+
         const extname = path.extname(filePath);
-        const contentType = extname === '.js' ? 'application/javascript' : extname === '.css' ? 'text/css' : 'text/html';
+        let contentType = 'text/html';
+        if (extname === '.js') {
+            contentType = 'application/javascript';
+        } else if (extname === '.css') {
+            contentType = 'text/css';
+        }
 
         fs.readFile(filePath, (err, content) => {
             if (err) {

@@ -3,23 +3,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Function to fetch the current Ethereum price
-function fetchEthereumPrice() {
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')  // API to get Ethereum price in USD
-        .then(response => response.json())  // Convert the response to JSON
+function updatePrice() {
+    fetch('https://your-app-name.onrender.com/api/price')
+        .then(response => response.json())
         .then(data => {
-            // Update the Ethereum price on the page
-            const ethPrice = data.ethereum.usd;
-            const currentTime = new Date().toLocaleTimeString(); // Get current time
-            document.getElementById('eth-price').innerText = `Ethereum Price: $${ethPrice} (Updated at ${currentTime})`;
+            const price = data.price;
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            document.getElementById('ethPrice').innerText = `Ethereum Price: $${price} (Updated at ${timestamp})`;
         })
-        .catch(error => {
-            // Handle any errors that occur during the fetch
-            document.getElementById('eth-price').innerText = 'Error fetching price';
-        });
+        .catch(error => console.error('Error:', error));
 }
 
-// Fetch the price every 30 seconds (30000 milliseconds)
-setInterval(fetchEthereumPrice, 30000);
-
-// Initial fetch when the page loads
-fetchEthereumPrice();
+setInterval(updatePrice, 30000);  // Update every 10 seconds
