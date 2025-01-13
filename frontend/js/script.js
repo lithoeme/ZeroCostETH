@@ -9,7 +9,7 @@ function updatePrice() {
         .then(data => {
             const price = data.price;
             const timestamp = new Date(data.timestamp).toLocaleTimeString();
-            document.getElementById('ethPrice').innerText = `Ethereum Price: $${price} (Updated at ${timestamp})`;
+            document.getElementById('eth-price').innerText = `Ethereum Price: $${price} (Updated at ${timestamp})`;
         })
         .catch(error => console.error('Error:', error));
 }
