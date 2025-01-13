@@ -9,7 +9,8 @@ function fetchEthereumPrice() {
         .then(data => {
             // Update the Ethereum price on the page
             const ethPrice = data.ethereum.usd;
-            document.getElementById('eth-price').innerText = `Ethereum Price: $${ethPrice}`;
+            const currentTime = new Date().toLocaleTimeString(); // Get current time
+            document.getElementById('eth-price').innerText = `Ethereum Price: $${ethPrice} (Updated at ${currentTime})`;
         })
         .catch(error => {
             // Handle any errors that occur during the fetch
