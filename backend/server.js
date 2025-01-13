@@ -14,7 +14,7 @@ const enableCORS = (req, res) => {
 const serveStaticFiles = (req, res) => {
     let filePath = path.join(__dirname, '..', 'frontend', req.url === '/' ? 'index.html' : req.url);
 
-    console.log(`Serving file: ${filePath}`); // Moved inside the function
+    console.log(`Serving file: ${filePath}`); // Logging the file path to troubleshoot
 
     fs.readFile(filePath, (err, content) => {
         if (err) {
@@ -28,7 +28,8 @@ const serveStaticFiles = (req, res) => {
             } else if (extname === '.css') {
                 contentType = 'text/css';
             }
-            enableCORS(req, res);  // Ensure CORS headers are applied before sending content
+
+            enableCORS(req, res);  // Apply CORS headers before serving content
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content);
         }
