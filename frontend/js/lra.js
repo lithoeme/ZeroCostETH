@@ -56,7 +56,7 @@ function predict(x, m, b) {
 }
 
 // Function to predict Ethereum movement
-async function predictEthereumMovement(interval = 'daily', days = 30) {
+async function predictEthereumMovement(interval = 'daily', days = 365) {
     console.log('Fetching data...');
     document.getElementById('prediction').innerText = 'Loading...';
     document.getElementById('accuracy').innerText = '';
